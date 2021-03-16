@@ -1,0 +1,39 @@
+- name: Basic setup to install Kubernetes cluster
+  gather_facts: no
+  become: yes
+  remote_user: ubuntu
+  hosts: masterhost
+  tasks:
+
+  - name: Installing ansible on a Master host
+    apt:
+      name: ansible
+      state: latest
+      update_cache: yes
+
+  - name: Transfering key file
+    copy:
+      src: keys/id_rsa
+      dest: /home/ubuntu/.ssh/
+      owner: ubuntu
+      group: ubuntu
+      mode: 0400
+  
+
+
+  - name: Transfering necessary files to the Master
+    copy:
+      src: master-files
+      dest: /home/ubuntu/
+      owner: ubuntu
+      group: ubuntu
+
+  - name: Making scripts executable
+    file:
+      path: "{{ item }}"
+      mode: 0774
+    with_items:
+      - /home/ubuntu/master-files/k8s-init/k8s-install.sh
+      - /home/ubuntu/master-files/k8s-init/generate-admin-client-certs.sh
+
+

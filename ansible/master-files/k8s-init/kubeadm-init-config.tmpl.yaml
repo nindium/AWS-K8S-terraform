@@ -1,0 +1,31 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+nodeRegistration:
+  kubeletExtraArgs:
+    cloud-provider: aws
+bootstrapTokens:
+- token: "${KUBEADM_TOKEN}"
+  description: "default kubeadm bootstrap token"
+  ttl: "0"
+
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration 
+kubernetesVersion: v${K8S_VERSION}
+clusterName: ${K8S_CLUSTER_NAME}
+certificatesDir: ${LOCAL_CERTS_DIR}
+networking:
+  podSubnet: 10.244.0.0/16
+apiServer:
+  certSANs:
+  - ${K8S_API_ENDPOINT_INTERNAL}
+  - ${K8S_API_ENDPOINT}
+ 
+  extraArgs:
+    cloud-provider: aws
+
+controllerManager:
+  extraArgs:
+    cloud-provider: aws
+    configure-cloud-routes: 'false'

@@ -1,0 +1,68 @@
+---
+- name: Install and config Kubernetes cluster
+  hosts: nodes:master
+  gather_facts: no
+  remote_user: ubuntu
+  become: yes
+  tasks:
+  
+  - name: Setting host name
+    command:
+      cmd: /usr/bin/hostnamectl set-hostname {{ hostname }}
+  
+  - name: Removing default docker installation if it exists
+    apt:
+      name: ['docker', 'docker-engine', 'docker.io']
+      state: absent
+  
+  - name: Update all packages to their latest version
+    apt:
+      upgrade: dist
+
+  - name: Pre-Install
+    apt:
+      name: ['apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'gnupg']
+      state: present
+
+  - name: Adding repo keys
+    apt_key:
+      url: "{{ item }}"
+      state: present
+    with_items:
+      - "https://download.docker.com/linux/ubuntu/gpg"
+      - "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+  
+  - name: Adding repos
+    apt_repository:
+      repo: "{{ item }}"
+    with_items:
+      - "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ubuntu_release }} stable"
+      - "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+
+  - name: Installing docker-ce
+    apt:
+      name: docker-ce
+      state: present
+      update_cache: yes
+  
+  - name: Adding user "ubuntu" to the "docker" group
+    user:
+      name: "ubuntu"
+      groups: "docker"
+      append: yes
+
+  - name: Installing kubernetes 
+    apt:
+      name: ['kubeadm', 'kubelet', 'kubectl']
+      state: present
+      update_cache: yes
+
+  - name: Hold kube* 
+    dpkg_selections:
+      name: "{{ item }}"
+      selection: hold
+    with_items:
+      - kubeadm
+      - kubelet
+      - kubectl
+

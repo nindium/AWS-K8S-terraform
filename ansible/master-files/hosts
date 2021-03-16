@@ -1,0 +1,13 @@
+[master]
+10.0.1.167 hostname=ip-10-0-1-167.ec2.internal ubuntu_release=bionic
+
+[node1]
+10.0.1.171 hostname=ip-10-0-1-171.ec2.internal ubuntu_release=bionic
+
+[node2]
+10.0.1.145 hostname=ip-10-0-1-145.ec2.internal ubuntu_release=bionic
+
+[nodes:children]
+node1
+node2
+
